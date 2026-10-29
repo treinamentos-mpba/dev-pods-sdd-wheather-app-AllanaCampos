@@ -2,24 +2,14 @@
 
 ## Contexto
 
-A empresa solicitou uma aplicação para consultar informações meteorológicas por cidade. Usuários precisam encontrar uma cidade, consultar as condições atuais e visualizar a previsão para os próximos cinco dias. A interface também deve permitir alternar entre Celsius e Fahrenheit e funcionar em dispositivos móveis.
-
-Esta análise organiza o briefing inicial. Detalhes sobre fontes de dados, atualização, plataformas e critérios de desempenho ainda precisam ser confirmados.
-
-## Decisões
-
-- **Fonte de dados — Open-Meteo, sem API key:** usar Open-Meteo para obter geocodificação e dados meteorológicos. Isso resolve a escolha do provedor e elimina a necessidade de gerenciar uma chave de API; cobertura, limites de uso e condições de licença ainda devem ser verificados.
-- **Período da previsão — hoje + 4 dias:** apresentar cinco dias no total, incluindo o dia atual. Isso esclarece como contar os “5 dias” solicitados.
-- **Unidade padrão — Celsius:** exibir temperaturas em Celsius inicialmente; o usuário ainda poderá alternar para Fahrenheit. Isso define o valor inicial da preferência de unidade.
-- **Autenticação e persistência — sem autenticação e sem persistência de servidor:** não exigir conta e não armazenar preferências ou dados do usuário em servidor. Isso fecha as dúvidas sobre cadastro e persistência no backend; persistência local no dispositivo não está definida por esta decisão.
-- **Idioma da interface — pt-BR:** apresentar textos e mensagens da UI em português brasileiro. Isso define o idioma inicial do produto; formatos regionais e suporte a outros idiomas permanecem fora desta decisão.
+A empresa solicitou uma aplicação de previsão do tempo para que usuários possam buscar cidades, consultar o clima atual e a previsão de cinco dias, alternar entre Celsius e Fahrenheit e acessar o serviço em dispositivos móveis. Este é o escopo central apresentado no briefing; critérios de aceitação e detalhes de uso serão definidos nas demais seções do discovery.
 
 ## Requisitos Funcionais
 
 - **RF-01 — Buscar cidades:** permitir que o usuário pesquise uma cidade pelo nome.
 - **RF-02 — Selecionar cidade:** permitir que o usuário escolha a cidade desejada quando a pesquisa retornar resultados ambíguos ou múltiplos, mostrando contexto suficiente para distingui-los, como região e país.
 - **RF-03 — Consultar clima atual:** exibir as condições meteorológicas atuais da cidade selecionada.
-- **RF-04 — Consultar previsão:** exibir a previsão para os próximos cinco dias da cidade selecionada.
+- **RF-04 — Consultar previsão:** exibir a previsão de hoje e dos quatro dias seguintes para a cidade selecionada.
 - **RF-05 — Alternar unidades:** permitir alternar entre Celsius e Fahrenheit e apresentar as temperaturas na unidade escolhida.
 - **RF-06 — Informar carregamento:** indicar quando uma busca ou consulta meteorológica estiver em andamento.
 - **RF-07 — Informar ausência de resultados:** informar quando a busca não encontrar cidades correspondentes.
@@ -38,22 +28,26 @@ Esta análise organiza o briefing inicial. Detalhes sobre fontes de dados, atual
 ## Riscos
 
 - A fonte de dados pode não oferecer cobertura ou precisão suficientes para todas as cidades pesquisadas.
+- A Open-Meteo pode não oferecer cobertura ou precisão suficientes para todas as cidades pesquisadas.
 - Resultados com nomes de cidades iguais podem levar à seleção de uma localização incorreta se não houver contexto adicional, como estado ou país.
 - Indisponibilidade, limites de uso ou mudanças na API meteorológica podem impedir a consulta de dados.
 - O briefing não define a frequência de atualização do clima atual; dados desatualizados podem gerar decisões equivocadas.
 - O escopo de “usar em dispositivos móveis” pode ser interpretado de formas diferentes, como site responsivo ou aplicativo nativo.
 - Sem critérios de desempenho, compatibilidade e acessibilidade, será difícil validar a qualidade da entrega.
+- Sem metas aprovadas de desempenho, uma lista de navegadores suportados e critérios de validação acordados, será difícil avaliar a qualidade da entrega.
 - As metas propostas de desempenho e disponibilidade podem não ser alcançáveis ou adequadas sem considerar a infraestrutura e a dependência do provedor externo.
 
 ## Perguntas em Aberto
 
 - Qual fonte de dados meteorológicos deve ser utilizada? Há requisitos de licença, custo ou cobertura?
+- A cobertura da Open-Meteo atende às localidades-alvo? Seus termos de uso são adequados para o produto?
 - A busca deve aceitar apenas cidades ou também localização atual, CEP ou coordenadas?
 - Como distinguir cidades com o mesmo nome? Devemos exibir estado, região e país?
 - “Previsão de 5 dias” significa cinco dias corridos a partir de hoje ou cinco dias completos?
 - Quais informações devem aparecer no clima atual e na previsão, além da temperatura?
 - Com que frequência os dados devem ser atualizados?
 - A unidade escolhida deve ser mantida entre sessões ou dispositivos?
+- A unidade escolhida deve ser mantida localmente entre sessões no mesmo navegador ou reiniciada em Celsius? Não haverá sincronização por servidor.
 - O produto deve ser um site responsivo, um aplicativo instalável ou ambos?
 - Quais navegadores e versões devem ser suportados?
 - As metas iniciais de desempenho (95% das interações em até 2 segundos) e disponibilidade (99,5% ao mês) são aceitáveis? Como medir cada uma e contabilizar a indisponibilidade da API externa?
@@ -68,3 +62,35 @@ Esta análise organiza o briefing inicial. Detalhes sobre fontes de dados, atual
 - A aplicação dependerá de um serviço externo para obter condições atuais e previsão.
 - Não foram solicitados cadastro, autenticação, histórico de buscas, notificações ou personalização além da unidade de temperatura.
 - Os detalhes ainda não confirmados neste documento, inclusive as metas quantitativas propostas, devem ser validados antes de se tornarem critérios definitivos de implementação.
+
+## Decisões
+
+- **D-01 — Fonte de dados: Open-Meteo, sem API key.** Justificativa: define o provedor para clima atual e previsão sem exigir gerenciamento de chave de API. Resolve a pergunta sobre qual fonte usar; cobertura para as localidades-alvo e termos de uso ainda devem ser confirmados.
+- **D-02 — Período da previsão: hoje e os quatro dias seguintes.** Justificativa: estabelece uma janela de cinco dias com regra explícita. Resolve a ambiguidade sobre o significado de “previsão de 5 dias”.
+- **D-03 — Unidade padrão: Celsius.** Justificativa: define a unidade inicial, mantendo disponível a alternância para Fahrenheit prevista em RF-05. Resolve qual unidade apresentar por padrão; a persistência da escolha continua em aberto.
+- **D-04 — Sem autenticação e sem persistência de dados no servidor.** Justificativa: mantém o produto utilizável sem conta e limita o escopo de backend e tratamento de dados de usuário. Resolve se haverá login e armazenamento de preferências no servidor; a persistência local no navegador ainda precisa ser decidida.
+- **D-05 — Idioma da interface: pt-BR.** Justificativa: define o idioma inicial de navegação e conteúdo. Resolve qual idioma a interface deve apresentar.
+
+## Personas (Hipóteses)
+
+As personas abaixo são hipóteses iniciais derivadas do briefing e devem ser validadas com usuários representativos.
+
+### Persona 1 — Camila, a pessoa que se desloca diariamente
+
+- **Objetivo principal:** saber rapidamente como está o tempo e o que esperar nos próximos dias para se preparar para o deslocamento e escolher o que vestir.
+- **Contexto de uso:** principalmente no celular, antes de sair de casa ou durante o trajeto; consulta a cidade onde mora.
+- **Métrica de sucesso percebida:** consegue encontrar a cidade e entender a temperatura e a condição atual em até 30 segundos, sem precisar repetir a busca.
+
+### Persona 2 — Rafael, quem planeja passeios
+
+- **Objetivo principal:** escolher um dia adequado para uma atividade considerando a previsão dos próximos cinco dias.
+- **Contexto de uso:** principalmente em desktop, ao planejar com antecedência; pode voltar ao celular para uma consulta rápida.
+- **Métrica de sucesso percebida:** consegue identificar e comparar as condições dos cinco dias e escolher quando fazer a atividade sem confundir datas ou unidades.
+
+### Persona 3 — Joana, quem consulta o tempo em deslocamento
+
+- **Objetivo principal:** verificar o clima de outra cidade e compreender a previsão mesmo quando está fora de casa ou usando uma unidade diferente da preferência inicial.
+- **Contexto de uso:** principalmente no celular, em consultas rápidas durante viagens; pode usar desktop para planejar antes de partir.
+- **Métrica de sucesso percebida:** encontra a localidade correta entre resultados semelhantes e alterna a unidade de temperatura com clareza, sem perder a cidade selecionada.
+
+As métricas são propostas qualitativas ou de usabilidade, não metas de produto aprovadas. Devem ser refinadas e validadas em pesquisa com usuários.
