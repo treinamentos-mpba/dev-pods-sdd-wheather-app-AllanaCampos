@@ -169,10 +169,10 @@ Tarefas derivadas de [`plans/weather-app-plan.md`](../plans/weather-app-plan.md)
 **Dependências:** T-02, T-16.  
 **Arquivos prováveis:** `tests/unit/lib/openMeteoMappers.test.ts`.
 
-### T-18 — Testar conversão de temperatura
+### T-18 — Testar unitariamente a conversão de unidade
 
 **Tipo:** Test  
-**Descrição:** Cobrir conversões Celsius/Fahrenheit e valor canônico.  
+**Descrição:** Testar isoladamente as funções de conversão Celsius/Fahrenheit, sem renderização ou serviços.  
 **Critérios de aceite:** Vitest espera 32 °F, 68 °F e -40 °F para 0 °C, 20 °C e -40 °C; conversão de retorno reproduz os valores Celsius; `null` continua ausente e a entrada não é mutada.  
 **Rastreabilidade:** AC-06 e AC-07.  
 **Dependências:** T-03, T-16.  
@@ -187,7 +187,7 @@ Tarefas derivadas de [`plans/weather-app-plan.md`](../plans/weather-app-plan.md)
 **Dependências:** T-04, T-05, T-16.  
 **Arquivos prováveis:** `tests/unit/lib/weatherCodes.test.ts`, `tests/unit/lib/dateFormat.test.ts`.
 
-### T-20 — Testar service de geocoding
+### T-20 — Testar service de geocoding com `fetch` mockado
 
 **Tipo:** Test  
 **Descrição:** Verificar URL, parâmetros, mapeamento e falhas com `fetch` mockado.  
@@ -196,7 +196,7 @@ Tarefas derivadas de [`plans/weather-app-plan.md`](../plans/weather-app-plan.md)
 **Dependências:** T-06, T-16.  
 **Arquivos prováveis:** `tests/unit/services/geocodingService.test.ts`.
 
-### T-21 — Testar service de forecast
+### T-21 — Testar service de forecast com `fetch` mockado
 
 **Tipo:** Test  
 **Descrição:** Verificar request, mapeamento e falhas do forecast com `fetch` mockado.  
@@ -241,11 +241,11 @@ Tarefas derivadas de [`plans/weather-app-plan.md`](../plans/weather-app-plan.md)
 **Dependências:** T-12, T-16.  
 **Arquivos prováveis:** `tests/unit/components/Forecast.test.tsx`.
 
-### T-26 — Testar componente de estados e erro
+### T-26 — Testar componente nos estados loading, erro e vazio
 
 **Tipo:** Test  
 **Descrição:** Verificar estados de feedback e handlers de retry.  
-**Critérios de aceite:** Testing Library cobre loading, vazio, sucesso e erro; compara literalmente mensagens AC-17; retry chama o handler correspondente; timeout recebido como erro encerra o loading e mostra mensagem de erro.  
+**Critérios de aceite:** Testing Library renderiza e verifica loading, erro e vazio separadamente, além do estado success; compara literalmente mensagens AC-17; retry chama o handler correspondente; timeout recebido como erro encerra o loading e mostra mensagem de erro.  
 **Rastreabilidade:** AC-08 a AC-13, AC-16 (timeout proposto) e AC-17.  
 **Dependências:** T-13, T-16.  
 **Arquivos prováveis:** `tests/unit/components/WeatherStatus.test.tsx`.
@@ -259,11 +259,11 @@ Tarefas derivadas de [`plans/weather-app-plan.md`](../plans/weather-app-plan.md)
 **Dependências:** T-14, T-16.  
 **Arquivos prováveis:** `tests/unit/components/UnitToggle.test.tsx`.
 
-### T-28 — Testar fluxos E2E desktop/mobile
+### T-28 — Testar fluxo principal E2E com viewport mobile
 
 **Tipo:** Test  
 **Descrição:** Exercitar jornadas completas com APIs interceptadas.  
-**Critérios de aceite:** Playwright verifica busca aparada, seleção de homônimo, cidade/dados correspondentes, cinco dias, conversão sem novo request, loading, vazio sem forecast, erro/mensagem/retry e resposta antiga ignorada; projetos desktop/mobile concluem; em viewport mobile de 320 px não há rolagem horizontal.  
+**Critérios de aceite:** Playwright executa o fluxo principal de busca, seleção, clima atual e cinco dias; também verifica busca aparada, conversão sem novo request, loading, vazio sem forecast, erro/retry e resposta antiga ignorada; projeto desktop e viewport mobile de 320 px passam sem rolagem horizontal.  
 **Rastreabilidade:** AC-01 a AC-03, AC-06 a AC-14, AC-17 e NFR-01.  
 **Dependências:** T-17 a T-27.  
 **Arquivos prováveis:** `tests/e2e/weather-app.spec.ts`.
