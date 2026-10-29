@@ -22,6 +22,10 @@ export interface OpenMeteoCurrentResponse {
   time?: string;
   temperature_2m?: number | null;
   weather_code?: number | null;
+  relative_humidity_2m?: number | null;
+  wind_speed_10m?: number | null;
+  precipitation?: number | null;
+  surface_pressure?: number | null;
 }
 
 export interface OpenMeteoDailyResponse {

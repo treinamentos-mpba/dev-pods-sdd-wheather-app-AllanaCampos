@@ -14,6 +14,10 @@ export interface CurrentWeather {
   temperatureC: number | null; // Temperatura atual em Celsius.
   weatherCode: number | null; // Código meteorológico WMO atual.
   observedAt: string | null; // Horário de referência retornado pela API.
+  humidityPercent?: number | null; // Umidade relativa em porcentagem.
+  windSpeedKmh?: number | null; // Velocidade do vento em quilômetros por hora.
+  precipitationMm?: number | null; // Precipitação em milímetros.
+  pressureHpa?: number | null; // Pressão atmosférica em hectopascais.
 }
 
 export interface ForecastDay {

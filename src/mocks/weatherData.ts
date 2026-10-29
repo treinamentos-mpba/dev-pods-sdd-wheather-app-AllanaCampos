@@ -15,6 +15,10 @@ export const mockWeatherData: WeatherData = {
     temperatureC: 22.4,
     weatherCode: 1,
     observedAt: '2026-10-29T10:00',
+    humidityPercent: 64,
+    windSpeedKmh: 12.6,
+    precipitationMm: 0,
+    pressureHpa: 1013.2,
   },
   forecast: [
     {
