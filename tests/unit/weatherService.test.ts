@@ -26,6 +26,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
@@ -83,6 +84,41 @@ describe('searchCities', () => {
       status: 503,
     });
   });
+
+  it('converte falha de rede offline em erro amigável de geocoding', async () => {
+    fetchMock.mockRejectedValue(new TypeError('fetch failed'));
+
+    await expect(searchCities('São Paulo')).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      service: 'geocoding',
+      kind: 'network',
+      message: 'Não foi possível buscar cidades. Verifique sua conexão e tente novamente.',
+    });
+  });
+
+  it('converte timeout de geocoding em erro de timeout', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockImplementation(
+      (_input, init) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            reject(new DOMException('Aborted', 'AbortError'));
+          });
+        }),
+    );
+
+    const request = searchCities('São Paulo');
+    const rejection = expect(request).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      service: 'geocoding',
+      kind: 'timeout',
+      message: 'A busca demorou mais que o esperado. Tente novamente.',
+    });
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    await rejection;
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
 
 describe('getWeather', () => {
@@ -139,5 +175,17 @@ describe('getWeather', () => {
     fetchMock.mockResolvedValue(jsonResponse(payload));
 
     await expect(getWeather(city)).rejects.toBeInstanceOf(WeatherServiceError);
+  });
+
+  it('converte falha de rede offline em erro amigável de forecast', async () => {
+    fetchMock.mockRejectedValue(new TypeError('fetch failed'));
+
+    await expect(getWeather(city)).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      service: 'weather',
+      kind: 'network',
+      message:
+        'Não foi possível carregar os dados meteorológicos. Verifique sua conexão e tente novamente.',
+    });
   });
 });
