@@ -21,7 +21,7 @@ describe('SearchBar', () => {
 
     render(<SearchBar onSearch={onSearch} />);
 
-    await user.type(screen.getByLabelText('Buscar cidade'), '  São Paulo  ');
+    await user.type(screen.getByRole('searchbox', { name: 'Buscar cidade' }), '  São Paulo  ');
     await user.click(screen.getByRole('button', { name: 'Buscar' }));
 
     expect(onSearch).toHaveBeenCalledTimes(1);
