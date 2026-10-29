@@ -42,19 +42,14 @@ Não adicionar biblioteca de estado global nem camada de cache: o fluxo é restr
 
 ## Project Structure
 
-tests/
 Usar a estrutura existente e criar apenas os módulos necessários:
 
-## Data Model
-
-Contratos de domínio sugeridos (não são DTOs da API):
-
-```ts
-type Unit = "celsius" | "fahrenheit";
+```text
+src/
 	components/
 		CitySearch.tsx       # Formulário e resultados de geocoding
 		CurrentWeather.tsx   # Condições atuais da cidade selecionada
-		Forecast.tsx         # Lista de cinco dias
+		Forecast.tsx         # Lista da previsão de cinco dias
 		WeatherStatus.tsx    # Loading, vazio e erros com retry
 	hooks/
 		useWeatherApp.ts     # Estado e orquestração do fluxo principal
@@ -63,15 +58,30 @@ type Unit = "celsius" | "fahrenheit";
 		weatherService.ts    # Consulta atual e previsão via Open-Meteo
 	lib/
 		openMeteoMappers.ts  # Respostas externas para tipos de domínio
-		temperature.ts       # Conversão Celsius/Fahrenheit
+		temperature.ts      # Conversão Celsius/Fahrenheit
 		weatherCodes.ts     # Código WMO para descrição pt-BR
 		dateFormat.ts       # Formatação de datas e horários locais
 	types/
 		weather.ts          # City, CurrentWeather, ForecastDay, WeatherData e Unit
 		openMeteo.ts        # Tipos mínimos dos payloads externos
+```
+
+Os nomes são uma proposta inicial e podem ser ajustados ao detalhar tarefas, sem misturar responsabilidades. Não duplicar configuração do Vite, Vitest ou Playwright.
+
+## Data Model
+
+Contratos de domínio sugeridos (não são DTOs da API):
+
+```ts
+type Unit = "celsius" | "fahrenheit";
+
+interface City {
+	id: number; // Identificador da localidade no geocoding.
+	name: string; // Nome da cidade retornado pela busca.
+	admin1?: string; // Região/estado para distinguir homônimos.
 	country: string; // País da localidade.
 	latitude: number; // Latitude usada na consulta meteorológica.
-Os nomes são uma proposta inicial e podem ser ajustados ao detalhar tarefas, sem misturar responsabilidades. Não duplicar configuração do Vite, Vitest ou Playwright.
+	longitude: number; // Longitude usada na consulta meteorológica.
 	timezone?: string; // Fuso IANA, quando retornado pelo geocoding.
 }
 
@@ -110,7 +120,7 @@ flowchart TD
 	D -->|"cidades encontradas"| E["Hook: guarda resultados"]
 	E --> F["UI: opções de cidade"]
 	F -->|"usuário seleciona"| G["Hook: define cidade e loading"]
-	G --> H["forecastService"]
+	G --> H["weatherService"]
 	H --> I["Open-Meteo Forecast"]
 	I -->|"resposta válida"| J["Hook: guarda WeatherData"]
 	J --> K["UI: clima atual e previsão"]
@@ -134,10 +144,11 @@ flowchart TD
 6. Normalizar a resposta meteorológica e renderizar cidade, observação atual e cinco datas locais em ordem cronológica, se os dados estiverem disponíveis (AC-03 a AC-05, AC-15). Se houver horário de referência, exibir “Atualizado em” com formatação pt-BR (AC-18 provisório).
 7. Alternar Celsius/Fahrenheit apenas muda apresentação. Datas e horários são formatados com `Intl.DateTimeFormat("pt-BR", ...)`, usando o fuso informado pela API.
 8. Uma resposta de consulta anterior à seleção mais recente não pode atualizar a tela; abortar a requisição anterior quando possível e validar a identidade/geração da consulta ao concluir.
+9. Enquanto a tela estiver aberta, agendar uma nova consulta quando chegar à próxima meia-noite no fuso da cidade selecionada. Recalcular o agendamento ao trocar de cidade e revalidar a data local ao retomar a aba, para atualizar os cinco dias sem polling contínuo (edge case da spec).
 
 ## External APIs
 
-Usar HTTPS e `fetch` nativo, sem chave de API.
+Servir a aplicação por HTTPS e usar HTTPS nas chamadas externas (NFR-07). A primeira versão não terá autenticação nem persistência de dados no servidor (NFR-08); o navegador chama a Open-Meteo diretamente, sem chave de API. Usar `fetch` nativo.
 
 - **Geocoding** — `GET https://geocoding-api.open-meteo.com/v1/search`
 	- Parâmetros: `name` (termo aparado), `count=10` (limite proposto), `language=pt` e `format=json`. `count` é uma decisão de implementação, não requisito de aceite.
@@ -245,9 +256,10 @@ Derivar os testes dos critérios de aceite e manter a maioria determinística, s
 - **Funções puras de `lib` (Vitest):** conversões Celsius/Fahrenheit com 0, 20 e -40 (AC-07); descrições dos códigos WMO; formatação pt-BR e fuso; mapeamento de payloads válidos e parciais. Testar entradas e saídas diretamente, sem mocks.
 - **`services` (Vitest):** mockar `fetch` para verificar endpoint e parâmetros, transformação da resposta, tratamento de lista vazia, HTTP não-2xx, erro de rede, timeout e payload inválido. Confirmar que os testes não fazem requisições externas.
 - **`hooks` (Vitest + Testing Library):** substituir serviços por doubles e verificar transições `idle → loading → success/empty/error`, retry, retenção da cidade/consulta e descarte de resposta obsoleta quando há nova seleção.
-- **Componentes (Vitest + Testing Library):** renderizar estados `loading`, `error`, `empty` e `success`; verificar textos pt-BR, resultados com região/país, dados meteorológicos, campos indisponíveis, retry, alternância de unidade e interação por teclado. Esses testes recebem estado/handlers controlados e não conhecem `fetch`.
+- **Componentes (Vitest + Testing Library):** renderizar estados `loading`, `error`, `empty` e `success`; verificar todos os textos definidos em AC-17, incluindo “Buscar cidade”, resultados com região/país, dados meteorológicos, campos indisponíveis, retry e alternância de unidade. Verificar roles/nomes acessíveis, navegação por teclado e foco. Esses testes recebem estado/handlers controlados e não conhecem `fetch`.
 - **Fluxos E2E (Playwright):** interceptar as APIs e cobrir busca, cidades homônimas, seleção, previsão de cinco dias, busca vazia, falhas e retry, além da corrida entre seleções. Verificar no viewport mobile de 320 px que os fluxos principais continuam acessíveis e não causam rolagem horizontal; complementar com viewport desktop.
-- Testes automatizados de desempenho, acessibilidade e compatibilidade só viram gates quando as metas, o nível de conformidade e a matriz ainda pendentes na spec forem aprovados.
+- **Auditoria de acessibilidade:** quando a meta WCAG 2.2 AA for aprovada, combinar verificação automatizada e revisão manual de foco, nomes acessíveis, contraste e critérios aplicáveis; escolher a ferramenta automatizada ao detalhar as tarefas.
+- Testes automatizados de desempenho e compatibilidade só viram gates quando as metas e a matriz ainda pendentes na spec forem aprovadas.
 
 ## Risks & Trade-offs
 
