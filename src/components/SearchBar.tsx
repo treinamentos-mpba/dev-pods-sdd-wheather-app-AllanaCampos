@@ -1,11 +1,12 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, type Ref, useState } from 'react';
 
 interface SearchBarProps {
   onSearch: (city: string) => void;
   disabled?: boolean;
+  inputRef?: Ref<HTMLInputElement>;
 }
 
-export default function SearchBar({ onSearch, disabled = false }: SearchBarProps) {
+export default function SearchBar({ onSearch, disabled = false, inputRef }: SearchBarProps) {
   const [city, setCity] = useState('');
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -29,6 +30,7 @@ export default function SearchBar({ onSearch, disabled = false }: SearchBarProps
           Buscar cidade
         </label>
         <input
+          ref={inputRef}
           id="city-search"
           name="city"
           type="search"
@@ -37,13 +39,13 @@ export default function SearchBar({ onSearch, disabled = false }: SearchBarProps
           onChange={(event) => setCity(event.target.value)}
           placeholder="Ex.: São Paulo"
           disabled={disabled}
-          className="w-full rounded-lg border border-white/10 bg-night-900/70 px-4 py-3 text-white placeholder:text-white/40 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-400/40 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded-lg border border-white/10 bg-night-900/70 px-4 py-3 text-white placeholder:text-white/65 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-400/40 disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
       <button
         type="submit"
         disabled={disabled}
-        className="rounded-lg bg-accent-500 px-5 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-lg bg-accent-600 px-5 py-3 font-medium text-white transition-colors hover:bg-accent-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Buscar
       </button>

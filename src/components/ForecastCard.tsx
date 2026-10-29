@@ -28,14 +28,14 @@ export default function ForecastCard({ day, unit }: ForecastCardProps) {
       </span>
       <p className="min-h-10 text-sm text-white/70">{condition.description}</p>
       <p className="mt-3 text-sm font-medium text-white">
-        <span className="text-white/60">Máx. </span>
+        <span className="text-white/75">Máx. </span>
         {formatTemperature(day.maximumC, unit)}
       </p>
       <p className="mt-1 text-sm text-white/70">
-        <span className="text-white/50">Mín. </span>
+        <span className="text-white/70">Mín. </span>
         {formatTemperature(day.minimumC, unit)}
       </p>
-      <p className="mt-4 text-xs text-white/60">
+      <p className="mt-4 text-xs text-white/75">
         Chuva:{' '}
         {precipitation === null || precipitation === undefined
           ? 'Dados indisponíveis'

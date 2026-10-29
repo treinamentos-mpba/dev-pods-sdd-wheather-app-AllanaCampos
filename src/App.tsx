@@ -24,10 +24,11 @@ export default function App() {
   const [unit, setUnit] = useState<Unit>('celsius');
   const [screenState, setScreenState] = useState<WeatherScreenState>({ status: 'idle' });
   const lastQuery = useRef('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSearch(city: string) {
     const query = city.trim();
-    if (!query) return;
+    if (!query || screenState.status === 'loading') return;
 
     lastQuery.current = query;
     setScreenState({ status: 'loading', query });
@@ -51,14 +52,16 @@ export default function App() {
   }
 
   function handleRetry() {
-    if (lastQuery.current) void handleSearch(lastQuery.current);
+    if (!lastQuery.current) return;
+    searchInputRef.current?.focus();
+    void handleSearch(lastQuery.current);
   }
 
   return (
     <div className="min-h-screen bg-night-900 text-white">
       <header className="border-b border-white/10 bg-night-800/60 backdrop-blur-md">
         <div className="mx-auto grid max-w-6xl gap-5 px-4 py-5 sm:px-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center lg:px-8">
-          <a href="/" className="flex w-fit items-center gap-3" aria-label="Weather App, início">
+          <div className="flex w-fit items-center gap-3">
             <span
               aria-hidden="true"
               className="grid h-10 w-10 place-items-center rounded-lg border border-accent-400/30 bg-accent-500/15 text-lg font-bold text-accent-400"
@@ -66,9 +69,9 @@ export default function App() {
               W
             </span>
             <span className="text-lg font-semibold tracking-wide text-white">Weather App</span>
-          </a>
+          </div>
 
-          <SearchBar onSearch={handleSearch} disabled={screenState.status === 'loading'} />
+          <SearchBar onSearch={handleSearch} inputRef={searchInputRef} />
 
           <div className="flex justify-end">
             <UnitToggle unit={unit} onChange={setUnit} />
@@ -76,7 +79,10 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <main
+        aria-busy={screenState.status === 'loading'}
+        className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 sm:py-10 lg:px-8"
+      >
         {screenState.status === 'idle' && (
           <EmptyState
             title="Consulte o clima da sua cidade"
@@ -99,6 +105,9 @@ export default function App() {
 
         {screenState.status === 'success' && (
           <div className="space-y-8">
+            <p role="status" aria-live="polite" className="sr-only">
+              Dados meteorológicos de {screenState.data.city.name} carregados.
+            </p>
             <CurrentWeather
               city={screenState.data.city}
               current={screenState.data.current}

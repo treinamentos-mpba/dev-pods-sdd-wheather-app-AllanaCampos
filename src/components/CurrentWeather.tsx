@@ -30,7 +30,7 @@ export default function CurrentWeather({ city, current, unit }: CurrentWeatherPr
           <h2 id="current-weather-title" className="text-xl font-semibold text-white">
             {city.name}
           </h2>
-          {locationContext && <p className="mt-1 text-sm text-white/60">{locationContext}</p>}
+          {locationContext && <p className="mt-1 text-sm text-white/70">{locationContext}</p>}
           <p className="mt-5 text-lg text-white/80">{condition.description}</p>
         </div>
 
@@ -53,25 +53,25 @@ export default function CurrentWeather({ city, current, unit }: CurrentWeatherPr
 
       <dl className="mt-7 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-white/10 pt-5 sm:grid-cols-4">
         <div>
-          <dt className="text-sm text-white/60">Umidade</dt>
+          <dt className="text-sm text-white/70">Umidade</dt>
           <dd className="mt-1 font-medium text-white">
             {formatMetric(current.humidityPercent, '%')}
           </dd>
         </div>
         <div>
-          <dt className="text-sm text-white/60">Vento</dt>
+          <dt className="text-sm text-white/70">Vento</dt>
           <dd className="mt-1 font-medium text-white">
             {formatMetric(current.windSpeedKmh, 'km/h')}
           </dd>
         </div>
         <div>
-          <dt className="text-sm text-white/60">Precipitação</dt>
+          <dt className="text-sm text-white/70">Precipitação</dt>
           <dd className="mt-1 font-medium text-white">
             {formatMetric(current.precipitationMm, 'mm')}
           </dd>
         </div>
         <div>
-          <dt className="text-sm text-white/60">Pressão</dt>
+          <dt className="text-sm text-white/70">Pressão</dt>
           <dd className="mt-1 font-medium text-white">
             {formatMetric(current.pressureHpa, 'hPa')}
           </dd>
