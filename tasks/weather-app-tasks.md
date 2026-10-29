@@ -300,3 +300,19 @@ Tarefas derivadas de [`plans/weather-app-plan.md`](../plans/weather-app-plan.md)
 ## Decisões pendentes
 
 As metas propostas de desempenho (NFR-02), disponibilidade (NFR-04), matriz de navegadores (NFR-05), timeout (AC-16) e acessibilidade (NFR-03) dependem de aprovação. Não tratá-las como gates antes da decisão; T-29 e T-30 dependem da aprovação de acessibilidade.
+
+## Matriz de rastreabilidade funcional
+
+| Requisito | Resumo | Tarefas de implementação | Tarefas de validação |
+|---|---|---|---|
+| FR-01 | Buscar cidades pelo nome | T-02, T-06, T-08, T-10 | T-17, T-20, T-22, T-23, T-28 |
+| FR-02 | Distinguir e selecionar cidades homônimas | T-02, T-06, T-08, T-10 | T-17, T-20, T-23, T-28 |
+| FR-03 | Consultar clima atual da cidade selecionada | T-02, T-07, T-08, T-11 | T-17, T-21, T-22, T-24, T-28 |
+| FR-04 | Consultar previsão de hoje e dos quatro dias seguintes | T-02, T-07, T-09, T-12 | T-19, T-21, T-22, T-25, T-28 |
+| FR-05 | Iniciar em Celsius e alternar para Fahrenheit | T-03, T-08, T-14 | T-18, T-22, T-27, T-28 |
+| FR-06 | Indicar carregamento de busca e consulta meteorológica | T-08, T-13 | T-22, T-26, T-28 |
+| FR-07 | Informar busca sem resultados | T-06, T-08, T-13 | T-20, T-22, T-26, T-28 |
+| FR-08 | Informar falhas e permitir nova tentativa | T-06, T-07, T-08, T-13 | T-20, T-21, T-22, T-26, T-28 |
+| FR-09 | Apresentar interface e mensagens em pt-BR | T-04, T-05, T-10, T-11, T-12, T-13, T-14, T-16 | T-19, T-23, T-24, T-25, T-26, T-28 |
+
+**Lacunas:** Nenhum requisito funcional FR-01 a FR-09 está sem tarefa de implementação e validação correspondente. Os itens sem requisito funcional direto são tarefas de suporte técnico; requisitos não funcionais e critérios provisórios permanecem identificados nas tarefas e decisões pendentes.
