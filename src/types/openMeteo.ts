@@ -1,25 +1,25 @@
 export interface OpenMeteoGeocodingResponse {
-  results?: OpenMeteoGeocodingResult[];
+  results?: Array<OpenMeteoGeocodingResult | null> | null;
 }
 
 export interface OpenMeteoGeocodingResult {
-  id?: number;
-  name?: string;
-  admin1?: string;
-  country?: string;
-  latitude?: number;
-  longitude?: number;
-  timezone?: string;
+  id?: number | null;
+  name?: string | null;
+  admin1?: string | null;
+  country?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  timezone?: string | null;
 }
 
 export interface OpenMeteoForecastResponse {
-  timezone?: string;
-  current?: OpenMeteoCurrentResponse;
-  daily?: OpenMeteoDailyResponse;
+  timezone?: string | null;
+  current?: OpenMeteoCurrentResponse | null;
+  daily?: OpenMeteoDailyResponse | null;
 }
 
 export interface OpenMeteoCurrentResponse {
-  time?: string;
+  time?: string | null;
   temperature_2m?: number | null;
   weather_code?: number | null;
   relative_humidity_2m?: number | null;
@@ -29,9 +29,9 @@ export interface OpenMeteoCurrentResponse {
 }
 
 export interface OpenMeteoDailyResponse {
-  time?: string[];
-  weather_code?: Array<number | null>;
-  temperature_2m_min?: Array<number | null>;
-  temperature_2m_max?: Array<number | null>;
-  precipitation_probability_max?: Array<number | null>;
+  time?: Array<string | null> | null;
+  weather_code?: Array<number | null> | null;
+  temperature_2m_min?: Array<number | null> | null;
+  temperature_2m_max?: Array<number | null> | null;
+  precipitation_probability_max?: Array<number | null> | null;
 }

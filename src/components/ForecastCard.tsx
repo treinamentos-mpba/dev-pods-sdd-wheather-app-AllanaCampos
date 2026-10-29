@@ -37,7 +37,7 @@ export default function ForecastCard({ day, unit }: ForecastCardProps) {
       </p>
       <p className="mt-4 text-xs text-white/75">
         Chuva:{' '}
-        {precipitation === null || precipitation === undefined
+        {typeof precipitation !== 'number' || !Number.isFinite(precipitation)
           ? 'Dados indisponíveis'
           : `${precipitation}%`}
       </p>

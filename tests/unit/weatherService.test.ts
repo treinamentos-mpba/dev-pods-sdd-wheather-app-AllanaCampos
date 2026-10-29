@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getWeather, searchCities, WeatherServiceError } from '../../src/services/weatherService';
+import { getWeather, searchCities } from '../../src/services/weatherService';
 import type { City } from '../../src/types/weather';
 
 const city: City = {
@@ -26,6 +26,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
@@ -67,6 +68,15 @@ describe('searchCities', () => {
 
     const requestUrl = new URL(String(fetchMock.mock.calls[0]?.[0]));
     expect(requestUrl.searchParams.get('name')).toBe("São Paulo d'Aliança");
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
+      encodeURIComponent("São Paulo d'Aliança"),
+    );
+  });
+
+  it('retorna lista vazia quando o geocoding não encontra cidades', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ results: [] }));
+
+    await expect(searchCities('Cidade inexistente')).resolves.toEqual([]);
   });
 
   it('retorna lista vazia quando results está ausente', async () => {
@@ -82,6 +92,41 @@ describe('searchCities', () => {
       name: 'WeatherServiceError',
       status: 503,
     });
+  });
+
+  it('converte falha de rede offline em erro amigável de geocoding', async () => {
+    fetchMock.mockRejectedValue(new TypeError('fetch failed'));
+
+    await expect(searchCities('São Paulo')).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      service: 'geocoding',
+      kind: 'network',
+      message: 'Não foi possível buscar cidades. Verifique sua conexão e tente novamente.',
+    });
+  });
+
+  it('converte timeout de geocoding em erro de timeout', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockImplementation(
+      (_input, init) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            reject(new DOMException('Aborted', 'AbortError'));
+          });
+        }),
+    );
+
+    const request = searchCities('São Paulo');
+    const rejection = expect(request).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      service: 'geocoding',
+      kind: 'timeout',
+      message: 'A busca demorou mais que o esperado. Tente novamente.',
+    });
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    await rejection;
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
 
@@ -132,12 +177,87 @@ describe('getWeather', () => {
     expect(weather.forecast[3]?.precipitationProbabilityPercent).toBe(80);
   });
 
+  it('normaliza campos current null e séries daily ausentes sem produzir undefined', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({
+        timezone: 'America/Sao_Paulo',
+        current: {
+          time: null,
+          temperature_2m: null,
+          weather_code: null,
+          relative_humidity_2m: null,
+          wind_speed_10m: null,
+          precipitation: null,
+          surface_pressure: null,
+        },
+        daily: {
+          time: ['2026-10-29', '2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02'],
+          weather_code: null,
+          temperature_2m_min: null,
+          temperature_2m_max: null,
+          precipitation_probability_max: null,
+        },
+      }),
+    );
+
+    const weather = await getWeather(city);
+
+    expect(weather.current).toEqual({
+      temperatureC: null,
+      weatherCode: null,
+      observedAt: null,
+      humidityPercent: null,
+      windSpeedKmh: null,
+      precipitationMm: 0,
+      pressureHpa: null,
+    });
+    expect(weather.forecast).toHaveLength(5);
+    expect(weather.forecast[0]).toEqual({
+      date: '2026-10-29',
+      weatherCode: null,
+      minimumC: null,
+      maximumC: null,
+      precipitationProbabilityPercent: null,
+    });
+  });
+
   it.each([
-    ['current', { daily: { time: ['2026-10-29'] } }],
-    ['daily', { current: { temperature_2m: 22 } }],
-  ])('lança WeatherServiceError quando %s está ausente', async (_missing, payload) => {
+    ['current', { timezone: city.timezone, daily: { time: ['2026-10-29'] } }],
+    ['daily', { timezone: city.timezone, current: { temperature_2m: 22 } }],
+  ])('lança erro de resposta inválida quando %s está ausente', async (_missing, payload) => {
     fetchMock.mockResolvedValue(jsonResponse(payload));
 
-    await expect(getWeather(city)).rejects.toBeInstanceOf(WeatherServiceError);
+    await expect(getWeather(city)).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      kind: 'invalid-response',
+      service: 'weather',
+    });
+  });
+
+  it('lança erro de resposta inválida quando daily.time está ausente', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({
+        timezone: city.timezone,
+        current: { temperature_2m: 20 },
+        daily: { weather_code: [0, 1, 2, 3, 4] },
+      }),
+    );
+
+    await expect(getWeather(city)).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      kind: 'invalid-response',
+    });
+  });
+
+  it('converte falha de rede offline em erro amigável de forecast', async () => {
+    fetchMock.mockRejectedValue(new TypeError('fetch failed'));
+
+    await expect(getWeather(city)).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      service: 'weather',
+      kind: 'network',
+      message:
+        'Não foi possível carregar os dados meteorológicos. Verifique sua conexão e tente novamente.',
+    });
   });
 });

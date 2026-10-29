@@ -17,6 +17,11 @@ describe('convertTemperature', () => {
   it('mantém null como temperatura indisponível', () => {
     expect(convertTemperature(null, 'fahrenheit')).toBeNull();
   });
+
+  it('trata números não finitos como temperatura indisponível', () => {
+    expect(convertTemperature(Number.NaN, 'fahrenheit')).toBeNull();
+    expect(convertTemperature(Number.POSITIVE_INFINITY, 'celsius')).toBeNull();
+  });
 });
 
 describe('formatTemperature', () => {
@@ -31,6 +36,7 @@ describe('formatTemperature', () => {
 
   it('indica quando a temperatura está indisponível', () => {
     expect(formatTemperature(null, 'celsius')).toBe('Dados indisponíveis');
+    expect(formatTemperature(Number.NaN, 'fahrenheit')).toBe('Dados indisponíveis');
   });
 });
 

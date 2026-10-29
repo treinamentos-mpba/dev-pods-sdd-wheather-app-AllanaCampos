@@ -1,3 +1,4 @@
+import { formatDateTime } from '../lib/format';
 import { convertTemperature } from '../lib/temperature';
 import { getWeatherCondition } from '../lib/weatherCodes';
 import type { City, CurrentWeather as CurrentWeatherData, Unit } from '../types/weather';
@@ -9,13 +10,14 @@ interface CurrentWeatherProps {
 }
 
 function formatMetric(value: number | null | undefined, unit: string): string {
-  if (value === null || value === undefined) return 'Dados indisponíveis';
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 'Dados indisponíveis';
   return `${Number.isInteger(value) ? value : value.toFixed(1)} ${unit}`;
 }
 
 export default function CurrentWeather({ city, current, unit }: CurrentWeatherProps) {
   const temperature = convertTemperature(current.temperatureC, unit);
   const condition = getWeatherCondition(current.weatherCode);
+  const updatedAt = formatDateTime(current.observedAt);
   const unitSymbol = unit === 'celsius' ? '°C' : '°F';
   const region = city.admin1 && city.admin1 !== city.name ? city.admin1 : undefined;
   const locationContext = [region, city.country].filter(Boolean).join(', ');
@@ -32,13 +34,14 @@ export default function CurrentWeather({ city, current, unit }: CurrentWeatherPr
           </h2>
           {locationContext && <p className="mt-1 text-sm text-white/70">{locationContext}</p>}
           <p className="mt-5 text-lg text-white/80">{condition.description}</p>
+          {updatedAt && <p className="mt-2 text-sm text-white/70">Atualizado em {updatedAt}</p>}
         </div>
 
-        <div className="flex items-center gap-5">
-          <span aria-hidden="true" className="text-6xl leading-none sm:text-7xl">
+        <div className="flex min-w-0 flex-wrap items-center gap-4 sm:gap-5">
+          <span aria-hidden="true" className="text-5xl leading-none sm:text-6xl lg:text-7xl">
             {condition.icon}
           </span>
-          <p className="flex items-start text-6xl font-semibold leading-none text-white sm:text-7xl">
+          <p className="flex min-w-0 items-start text-5xl font-semibold leading-none text-white sm:text-6xl lg:text-7xl">
             {temperature === null ? (
               <span className="text-xl text-white/70">Dados indisponíveis</span>
             ) : (

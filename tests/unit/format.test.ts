@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDayLabel, getShortDate } from '../../src/lib/format';
+import { formatDateTime, formatDayLabel, getShortDate } from '../../src/lib/format';
 
 describe('formatDayLabel', () => {
   it('usa Hoje para o índice zero', () => {
@@ -26,5 +26,20 @@ describe('getShortDate', () => {
 
   it('retorna uma indicação neutra para data inválida', () => {
     expect(getShortDate('data-invalida')).toBe('Data indisponível');
+  });
+});
+
+describe('formatDateTime', () => {
+  it('formata o horário local da API em pt-BR', () => {
+    const formattedDateTime = formatDateTime('2026-10-29T10:00');
+
+    expect(formattedDateTime).toContain('29');
+    expect(formattedDateTime).toContain('out.');
+    expect(formattedDateTime).toContain('10:00');
+  });
+
+  it('retorna null para timestamp ausente ou inválido', () => {
+    expect(formatDateTime(null)).toBeNull();
+    expect(formatDateTime('data-invalida')).toBeNull();
   });
 });
