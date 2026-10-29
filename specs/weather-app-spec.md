@@ -63,6 +63,19 @@ AC-04, AC-05, AC-15 e AC-18 são critérios provisórios: dependem da aprovaçã
 
 As metas quantitativas, o perfil de teste, o nível de conformidade e a matriz de compatibilidade indicados como propostas dependem de aprovação antes de serem usados como critérios finais de aceite.
 
+## Traceability Matrix
+
+| User Story | Acceptance Criteria | NFRs específicos relacionados |
+|---|---|---|
+| US-01 — Buscar cidade e consultar clima atual | AC-01, AC-04, AC-08, AC-09, AC-13, AC-14, AC-15, AC-17, AC-18 | NFR-01, NFR-02, NFR-03, NFR-05, NFR-06, NFR-09 |
+| US-02 — Consultar previsão de cinco dias | AC-05, AC-09, AC-15, AC-16, AC-17, AC-18 | NFR-01, NFR-02, NFR-03, NFR-05, NFR-06, NFR-09 |
+| US-03 — Distinguir e selecionar cidades homônimas | AC-01, AC-02, AC-03, AC-10, AC-11, AC-13, AC-14, AC-16, AC-17 | NFR-01, NFR-02, NFR-03, NFR-05, NFR-06 |
+| US-04 — Alternar unidade de temperatura | AC-06, AC-07, AC-17 | NFR-01, NFR-02, NFR-03, NFR-05 |
+| US-05 — Recuperar-se de ausência de resultados ou falha | AC-10, AC-11, AC-12, AC-16, AC-17 | NFR-01, NFR-02, NFR-03, NFR-05, NFR-06 |
+| US-06 — Usar a interface em pt-BR | AC-17 | NFR-01, NFR-03, NFR-05 |
+
+**NFRs transversais:** NFR-04 (disponibilidade), NFR-07 (HTTPS) e NFR-08 (minimização de dados) aplicam-se a todas as User Stories, mesmo quando não aparecem na coluna de NFRs específicos.
+
 ## Edge Cases
 
 - **Input vazio:** quando o campo estiver vazio ou contiver apenas espaços, não iniciar geocoding nem consulta meteorológica; solicitar que o usuário informe uma cidade e manter o campo disponível para edição.
