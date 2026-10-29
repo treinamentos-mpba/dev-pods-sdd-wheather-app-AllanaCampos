@@ -33,4 +33,5 @@ export interface OpenMeteoDailyResponse {
   weather_code?: Array<number | null>;
   temperature_2m_min?: Array<number | null>;
   temperature_2m_max?: Array<number | null>;
+  precipitation_probability_max?: Array<number | null>;
 }

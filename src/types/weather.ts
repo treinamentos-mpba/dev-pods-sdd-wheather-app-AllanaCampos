@@ -25,6 +25,7 @@ export interface ForecastDay {
   weatherCode: number | null; // Código meteorológico WMO do dia.
   minimumC: number | null; // Temperatura mínima em Celsius.
   maximumC: number | null; // Temperatura máxima em Celsius.
+  precipitationProbabilityPercent?: number | null; // Probabilidade máxima de precipitação em porcentagem.
 }
 
 export interface WeatherData {
