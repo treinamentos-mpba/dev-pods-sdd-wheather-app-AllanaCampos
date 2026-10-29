@@ -141,7 +141,7 @@ export async function getWeather(city: City): Promise<WeatherData> {
       observedAt: current.time ?? null,
       humidityPercent: current.relative_humidity_2m ?? null,
       windSpeedKmh: current.wind_speed_10m ?? null,
-      precipitationMm: current.precipitation ?? null,
+      precipitationMm: current.precipitation ?? 0,
       pressureHpa: current.surface_pressure ?? null,
     },
     forecast: dates.map((date, index) => ({
