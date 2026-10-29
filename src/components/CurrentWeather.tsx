@@ -1,3 +1,4 @@
+import { formatDateTime } from '../lib/format';
 import { convertTemperature } from '../lib/temperature';
 import { getWeatherCondition } from '../lib/weatherCodes';
 import type { City, CurrentWeather as CurrentWeatherData, Unit } from '../types/weather';
@@ -16,6 +17,7 @@ function formatMetric(value: number | null | undefined, unit: string): string {
 export default function CurrentWeather({ city, current, unit }: CurrentWeatherProps) {
   const temperature = convertTemperature(current.temperatureC, unit);
   const condition = getWeatherCondition(current.weatherCode);
+  const updatedAt = formatDateTime(current.observedAt);
   const unitSymbol = unit === 'celsius' ? '°C' : '°F';
   const region = city.admin1 && city.admin1 !== city.name ? city.admin1 : undefined;
   const locationContext = [region, city.country].filter(Boolean).join(', ');
@@ -32,6 +34,7 @@ export default function CurrentWeather({ city, current, unit }: CurrentWeatherPr
           </h2>
           {locationContext && <p className="mt-1 text-sm text-white/70">{locationContext}</p>}
           <p className="mt-5 text-lg text-white/80">{condition.description}</p>
+          {updatedAt && <p className="mt-2 text-sm text-white/70">Atualizado em {updatedAt}</p>}
         </div>
 
         <div className="flex min-w-0 flex-wrap items-center gap-4 sm:gap-5">

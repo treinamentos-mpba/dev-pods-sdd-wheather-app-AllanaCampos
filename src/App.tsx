@@ -82,10 +82,10 @@ export default function App() {
               <p role="status" aria-live="polite" className="sr-only">
                 Dados meteorológicos de {weather.data.city.name} carregados.
               </p>
-              {weather.cities.length > 1 && (
+              {weather.cities.length > 0 && (
                 <section aria-labelledby="city-results-heading" className="space-y-3">
                   <h2 id="city-results-heading" className="text-sm font-medium text-white/80">
-                    Escolha uma cidade
+                    {weather.cities.length > 1 ? 'Escolha uma cidade' : 'Cidade encontrada'}
                   </h2>
                   <ul className="flex flex-wrap gap-2">
                     {weather.cities.map((city) => (

@@ -8,13 +8,19 @@ interface SearchBarProps {
 
 export default function SearchBar({ onSearch, disabled = false, inputRef }: SearchBarProps) {
   const [city, setCity] = useState('');
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedCity = city.trim();
-    if (disabled || trimmedCity.length === 0) return;
+    if (disabled) return;
+    if (trimmedCity.length === 0) {
+      setValidationMessage('Informe uma cidade.');
+      return;
+    }
 
+    setValidationMessage(null);
     onSearch(trimmedCity);
   }
 
@@ -35,12 +41,22 @@ export default function SearchBar({ onSearch, disabled = false, inputRef }: Sear
           name="city"
           type="search"
           autoComplete="off"
+          aria-invalid={validationMessage !== null}
+          aria-describedby={validationMessage ? 'city-search-error' : undefined}
           value={city}
-          onChange={(event) => setCity(event.target.value)}
+          onChange={(event) => {
+            setCity(event.target.value);
+            if (validationMessage) setValidationMessage(null);
+          }}
           placeholder="Ex.: São Paulo"
           disabled={disabled}
           className="w-full rounded-lg border border-white/25 bg-night-900/70 px-4 py-3 text-white placeholder:text-white/65 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-400/40 disabled:cursor-not-allowed disabled:opacity-50"
         />
+        {validationMessage && (
+          <p id="city-search-error" role="alert" className="mt-2 text-sm text-red-200">
+            {validationMessage}
+          </p>
+        )}
       </div>
       <button
         type="submit"

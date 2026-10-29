@@ -60,6 +60,9 @@ test('busca cidade, mostra previsão e converte temperatura para Fahrenheit', as
   await searchForSaoPaulo(page);
 
   await expect(page.getByRole('heading', { name: 'São Paulo' })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'São Paulo, São Paulo, Brasil', exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole('region', { name: 'Previsão de 5 dias' })).toBeVisible();
   expect(forecastRequests).toHaveLength(1);
 

@@ -66,4 +66,22 @@ describe('UnitToggle com CurrentWeather', () => {
     expect(weatherRegion.textContent).not.toContain('undefined');
     expect(weatherRegion.textContent).toContain('Dados indisponíveis');
   });
+
+  it('exibe Atualizado em quando a API retorna observedAt', () => {
+    render(
+      <CurrentWeather
+        city={city}
+        unit="celsius"
+        current={{
+          temperatureC: 22,
+          weatherCode: 1,
+          observedAt: '2026-10-29T10:00',
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('region', { name: 'São Paulo' }).textContent).toContain(
+      'Atualizado em 29 de out., 10:00',
+    );
+  });
 });
