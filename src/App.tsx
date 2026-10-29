@@ -6,56 +6,13 @@ import EmptyState from './components/states/EmptyState';
 import ErrorState from './components/states/ErrorState';
 import LoadingState from './components/states/LoadingState';
 import UnitToggle from './components/UnitToggle';
-import { mockWeatherData } from './mocks/weatherData';
-import type { Unit, WeatherData } from './types/weather';
-
-type WeatherScreenState =
-  | { status: 'idle' }
-  | { status: 'loading'; query: string }
-  | { status: 'empty'; query: string }
-  | { status: 'error'; query: string; message: string }
-  | { status: 'success'; data: WeatherData };
-
-function normalizeCityName(city: string): string {
-  return city.trim().toLocaleLowerCase('pt-BR');
-}
+import { useWeather } from './hooks/useWeather';
+import type { Unit } from './types/weather';
 
 export default function App() {
   const [unit, setUnit] = useState<Unit>('celsius');
-  const [screenState, setScreenState] = useState<WeatherScreenState>({ status: 'idle' });
-  const lastQuery = useRef('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  async function handleSearch(city: string) {
-    const query = city.trim();
-    if (!query || screenState.status === 'loading') return;
-
-    lastQuery.current = query;
-    setScreenState({ status: 'loading', query });
-
-    try {
-      await new Promise<void>((resolve) => window.setTimeout(resolve, 300));
-
-      if (normalizeCityName(query) === normalizeCityName(mockWeatherData.city.name)) {
-        setScreenState({ status: 'success', data: mockWeatherData });
-        return;
-      }
-
-      setScreenState({ status: 'empty', query });
-    } catch {
-      setScreenState({
-        status: 'error',
-        query,
-        message: 'Não foi possível carregar os dados meteorológicos',
-      });
-    }
-  }
-
-  function handleRetry() {
-    if (!lastQuery.current) return;
-    searchInputRef.current?.focus();
-    void handleSearch(lastQuery.current);
-  }
+  const weather = useWeather();
 
   return (
     <div className="min-h-screen bg-night-900 text-white">
@@ -71,7 +28,7 @@ export default function App() {
             <span className="text-lg font-semibold tracking-wide text-white">Weather App</span>
           </div>
 
-          <SearchBar onSearch={handleSearch} inputRef={searchInputRef} />
+          <SearchBar onSearch={weather.search} inputRef={searchInputRef} />
 
           <div className="flex justify-end">
             <UnitToggle unit={unit} onChange={setUnit} />
@@ -80,40 +37,63 @@ export default function App() {
       </header>
 
       <main
-        aria-busy={screenState.status === 'loading'}
+        aria-busy={weather.status === 'loading'}
         className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 sm:py-10 lg:px-8"
       >
-        {screenState.status === 'idle' && (
+        {weather.status === 'idle' && (
           <EmptyState
             title="Consulte o clima da sua cidade"
-            hint="Busque São Paulo para visualizar a demonstração com dados locais."
+            hint="Busque uma cidade para ver as condições atuais e a previsão para cinco dias."
           />
         )}
 
-        {screenState.status === 'loading' && <LoadingState />}
+        {weather.status === 'loading' && <LoadingState />}
 
-        {screenState.status === 'empty' && (
+        {weather.status === 'empty' && (
           <EmptyState
             title="Nenhuma cidade encontrada"
-            hint={`Não há dados de demonstração para “${screenState.query}”. Tente São Paulo.`}
+            hint={`Não encontramos resultados para “${weather.query}”. Verifique o nome e tente novamente.`}
           />
         )}
 
-        {screenState.status === 'error' && (
-          <ErrorState message={screenState.message} onRetry={handleRetry} />
+        {weather.status === 'error' && (
+          <ErrorState
+            message={weather.error ?? 'Não foi possível carregar os dados.'}
+            onRetry={() => {
+              searchInputRef.current?.focus();
+              void weather.retry();
+            }}
+          />
         )}
 
-        {screenState.status === 'success' && (
+        {weather.status === 'success' && weather.data && (
           <div className="space-y-8">
             <p role="status" aria-live="polite" className="sr-only">
-              Dados meteorológicos de {screenState.data.city.name} carregados.
+              Dados meteorológicos de {weather.data.city.name} carregados.
             </p>
-            <CurrentWeather
-              city={screenState.data.city}
-              current={screenState.data.current}
-              unit={unit}
-            />
-            <ForecastList forecast={screenState.data.forecast} unit={unit} />
+            {weather.cities.length > 1 && (
+              <section aria-labelledby="city-results-heading" className="space-y-3">
+                <h2 id="city-results-heading" className="text-sm font-medium text-white/80">
+                  Escolha uma cidade
+                </h2>
+                <ul className="flex flex-wrap gap-2">
+                  {weather.cities.map((city) => (
+                    <li key={city.id}>
+                      <button
+                        type="button"
+                        aria-pressed={weather.data?.city.id === city.id}
+                        onClick={() => void weather.selectCity(city)}
+                        className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
+                      >
+                        {[city.name, city.admin1, city.country].filter(Boolean).join(', ')}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+            <CurrentWeather city={weather.data.city} current={weather.data.current} unit={unit} />
+            <ForecastList forecast={weather.data.forecast} unit={unit} />
           </div>
         )}
       </main>
