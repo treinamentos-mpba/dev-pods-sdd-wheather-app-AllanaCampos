@@ -15,7 +15,6 @@ A primeira versão será uma aplicação web responsiva. Não haverá autentica�
 - **FR-05 — Alternar unidade de temperatura:** iniciar em Celsius e permitir alternar entre Celsius e Fahrenheit.
 - **FR-06 — Indicar carregamento:** informar quando uma busca ou consulta meteorológica estiver em andamento.
 - **FR-07 — Informar ausência de resultados:** informar quando uma busca não retornar cidades.
-- **FR-08 — Tratar falhas de consulta:** informar falhas de forma compreensível e permitir nova tentativa.
 - **FR-08 — Tratar falhas de consulta:** informar falhas de geocodificação ou de consulta meteorológica de forma compreensível e permitir nova tentativa.
 - **FR-09 — Apresentar a interface em pt-BR:** exibir a interface e as mensagens do produto em português do Brasil.
 
@@ -62,7 +61,6 @@ AC-04, AC-05, AC-15 e AC-18 são critérios provisórios: dependem da aprovaçã
 - **NFR-08 — Minimização de dados:** não exigir conta nem persistir dados de usuário no servidor.
 - **NFR-09 — Atualidade dos dados (proposta):** quando a resposta fornecer horário de referência, exibi-lo junto aos dados; definir idade máxima aceitável para que uma informação seja apresentada como atual.
 
-As metas quantitativas e o nível de conformidade indicados como propostas dependem de aprovação antes de serem usados como critérios contratuais de aceite.
 As metas quantitativas, o perfil de teste, o nível de conformidade e a matriz de compatibilidade indicados como propostas dependem de aprovação antes de serem usados como critérios finais de aceite.
 
 ## Edge Cases
@@ -74,12 +72,10 @@ As metas quantitativas, o perfil de teste, o nível de conformidade e a matriz d
 - **Cidade localizada sem cobertura meteorológica:** manter a localidade selecionada e informar que não há dados disponíveis para ela; nunca substituir silenciosamente por dados de outra cidade.
 - **Cidades homônimas:** exibir região e país para distinguir os resultados antes da seleção; após a seleção, os dados exibidos devem corresponder à localidade escolhida.
 - **Falha de API:** se a Open-Meteo retornar erro ou a comunicação falhar, encerrar o carregamento, informar que os dados não puderam ser obtidos e oferecer “Tentar novamente”. Não tratar a falha como uma busca sem resultados.
-- **Timeout:** se a consulta ultrapassar o limite configurado, encerrar o carregamento, informar a falha e oferecer nova tentativa. O limite de tempo ainda precisa ser definido; não apresentar a solicitação pendente como resultado.
 - **Timeout:** como limite inicial proposto, se a solicitação continuar sem resposta após 10 segundos, encerrar o carregamento, informar a falha e oferecer nova tentativa; a aprovação desse limite permanece em aberto.
 - **Resposta parcial:** exibir os campos meteorológicos recebidos e marcar como indisponíveis os campos ausentes, sem inventar ou estimar valores; se faltarem dados de um dia, preservar a data e indicar a indisponibilidade para aquele dia.
 - **Consultas concorrentes:** se o usuário selecionar outra cidade enquanto uma solicitação anterior está pendente, ignorar a resposta antiga para que ela não substitua os dados da seleção mais recente.
 - **Alternância de unidade:** quando Celsius/Fahrenheit for alternado, atualizar todos os valores de temperatura visíveis sem alterar a cidade selecionada.
-- **Mudança de data:** durante uma sessão que atravesse a meia-noite, atualizar a previsão para hoje e os quatro dias seguintes no fuso da localidade; confirmar esta regra de fuso é uma pergunta em aberto.
 - **Mudança de data:** durante uma sessão que atravesse a meia-noite, atualizar a previsão para a data local da cidade selecionada e os quatro dias seguintes.
 - **Largura mínima:** em uma tela de 320 px, manter busca, seleção, clima atual, previsão e alternância de unidade acessíveis, sem rolagem horizontal.
 
@@ -107,7 +103,6 @@ As metas quantitativas, o perfil de teste, o nível de conformidade e a matriz d
 
 - Cadastro, login e contas de usuário.
 - Persistência ou sincronização de preferências no servidor.
-- Localização automática, busca por CEP ou coordenadas, salvo decisão futura.
 - Localização automática, busca por CEP ou coordenadas não fazem parte da primeira versão.
 - Alertas, notificações, mapas meteorológicos e histórico de condições passadas.
 - Previsões horárias ou períodos além dos cinco dias definidos.
