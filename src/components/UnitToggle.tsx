@@ -40,7 +40,7 @@ export default function UnitToggle({ unit, onChange }: UnitToggleProps) {
         aria-pressed={unit === 'celsius'}
         onClick={() => onChange('celsius')}
         onKeyDown={handleKeyDown}
-        className={`min-w-12 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 ${unit === 'celsius' ? 'bg-accent-600 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+        className={`min-w-12 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 ${unit === 'celsius' ? 'bg-accent-700 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
       >
         °C
       </button>
@@ -54,7 +54,7 @@ export default function UnitToggle({ unit, onChange }: UnitToggleProps) {
         aria-pressed={unit === 'fahrenheit'}
         onClick={() => onChange('fahrenheit')}
         onKeyDown={handleKeyDown}
-        className={`min-w-12 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 ${unit === 'fahrenheit' ? 'bg-accent-600 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+        className={`min-w-12 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 ${unit === 'fahrenheit' ? 'bg-accent-700 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
       >
         °F
       </button>

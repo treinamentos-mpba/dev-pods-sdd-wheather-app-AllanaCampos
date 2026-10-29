@@ -34,11 +34,11 @@ export default function CurrentWeather({ city, current, unit }: CurrentWeatherPr
           <p className="mt-5 text-lg text-white/80">{condition.description}</p>
         </div>
 
-        <div className="flex items-center gap-5">
-          <span aria-hidden="true" className="text-6xl leading-none sm:text-7xl">
+        <div className="flex min-w-0 flex-wrap items-center gap-4 sm:gap-5">
+          <span aria-hidden="true" className="text-5xl leading-none sm:text-6xl lg:text-7xl">
             {condition.icon}
           </span>
-          <p className="flex items-start text-6xl font-semibold leading-none text-white sm:text-7xl">
+          <p className="flex min-w-0 items-start text-5xl font-semibold leading-none text-white sm:text-6xl lg:text-7xl">
             {temperature === null ? (
               <span className="text-xl text-white/70">Dados indisponíveis</span>
             ) : (
