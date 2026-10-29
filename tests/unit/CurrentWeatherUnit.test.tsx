@@ -42,4 +42,28 @@ describe('UnitToggle com CurrentWeather', () => {
     );
     expect(screen.getByRole('region', { name: 'São Paulo' }).textContent).toContain('32.0°F');
   });
+
+  it('mostra fallback para métricas ausentes ou não finitas', () => {
+    render(
+      <CurrentWeather
+        city={city}
+        unit="celsius"
+        current={{
+          temperatureC: Number.NaN,
+          weatherCode: null,
+          observedAt: null,
+          humidityPercent: Number.NaN,
+          windSpeedKmh: undefined,
+          precipitationMm: null,
+          pressureHpa: Number.POSITIVE_INFINITY,
+        }}
+      />,
+    );
+
+    const weatherRegion = screen.getByRole('region', { name: 'São Paulo' });
+    expect(weatherRegion.textContent).not.toContain('NaN');
+    expect(weatherRegion.textContent).not.toContain('Infinity');
+    expect(weatherRegion.textContent).not.toContain('undefined');
+    expect(weatherRegion.textContent).toContain('Dados indisponíveis');
+  });
 });

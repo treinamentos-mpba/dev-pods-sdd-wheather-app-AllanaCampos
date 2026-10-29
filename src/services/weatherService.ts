@@ -85,15 +85,28 @@ async function readJson<T>(response: Response, service: WeatherServiceName): Pro
   }
 }
 
-function mapGeocodingResult(result: OpenMeteoGeocodingResult): City {
+function finiteNumber(value: number | null | undefined): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function mapGeocodingResult(result: OpenMeteoGeocodingResult | null): City {
+  if (!result) {
+    throw createWeatherServiceError('geocoding', 'invalid-response');
+  }
+
   const { id, name, country, latitude, longitude } = result;
 
   if (
-    id === undefined ||
-    name === undefined ||
-    country === undefined ||
-    latitude === undefined ||
-    longitude === undefined
+    typeof id !== 'number' ||
+    !Number.isFinite(id) ||
+    typeof name !== 'string' ||
+    name.trim().length === 0 ||
+    typeof country !== 'string' ||
+    country.trim().length === 0 ||
+    typeof latitude !== 'number' ||
+    !Number.isFinite(latitude) ||
+    typeof longitude !== 'number' ||
+    !Number.isFinite(longitude)
   ) {
     throw createWeatherServiceError('geocoding', 'invalid-response');
   }
@@ -104,8 +117,12 @@ function mapGeocodingResult(result: OpenMeteoGeocodingResult): City {
     country,
     latitude,
     longitude,
-    ...(result.admin1 === undefined ? {} : { admin1: result.admin1 }),
-    ...(result.timezone === undefined ? {} : { timezone: result.timezone }),
+    ...(typeof result.admin1 === 'string' && result.admin1.length > 0
+      ? { admin1: result.admin1 }
+      : {}),
+    ...(typeof result.timezone === 'string' && result.timezone.length > 0
+      ? { timezone: result.timezone }
+      : {}),
   };
 }
 
@@ -122,7 +139,7 @@ export async function searchCities(name: string): Promise<City[]> {
 
   const payload = await readJson<OpenMeteoGeocodingResponse>(response, 'geocoding');
   const results = payload?.results;
-  if (results === undefined) return [];
+  if (results == null) return [];
   if (!Array.isArray(results)) {
     throw createWeatherServiceError('geocoding', 'invalid-response');
   }
@@ -131,10 +148,10 @@ export async function searchCities(name: string): Promise<City[]> {
 }
 
 function assertAlignedSeries(
-  values: Array<number | null> | undefined,
+  values: Array<number | null> | null | undefined,
   expectedLength: number,
 ): void {
-  if (values !== undefined && values.length !== expectedLength) {
+  if (values != null && values.length !== expectedLength) {
     throw createWeatherServiceError('weather', 'invalid-response');
   }
 }
@@ -163,16 +180,21 @@ export async function getWeather(city: City): Promise<WeatherData> {
 
   const { current, daily } = payload;
   const dates = daily.time;
-  if (dates?.length !== 5) {
+  if (
+    !Array.isArray(dates) ||
+    dates.length !== 5 ||
+    dates.some((date) => typeof date !== 'string' || date.trim().length === 0)
+  ) {
     throw createWeatherServiceError('weather', 'invalid-response');
   }
+  const forecastDates = dates as string[];
 
-  assertAlignedSeries(daily.weather_code, dates.length);
-  assertAlignedSeries(daily.temperature_2m_min, dates.length);
-  assertAlignedSeries(daily.temperature_2m_max, dates.length);
-  assertAlignedSeries(daily.precipitation_probability_max, dates.length);
+  assertAlignedSeries(daily.weather_code, forecastDates.length);
+  assertAlignedSeries(daily.temperature_2m_min, forecastDates.length);
+  assertAlignedSeries(daily.temperature_2m_max, forecastDates.length);
+  assertAlignedSeries(daily.precipitation_probability_max, forecastDates.length);
 
-  const timezone = payload.timezone ?? city.timezone;
+  const timezone = payload.timezone?.trim() || city.timezone?.trim();
   if (!timezone) {
     throw createWeatherServiceError('weather', 'invalid-response');
   }
@@ -181,20 +203,20 @@ export async function getWeather(city: City): Promise<WeatherData> {
     city,
     timezone,
     current: {
-      temperatureC: current.temperature_2m ?? null,
-      weatherCode: current.weather_code ?? null,
+      temperatureC: finiteNumber(current.temperature_2m),
+      weatherCode: finiteNumber(current.weather_code),
       observedAt: current.time ?? null,
-      humidityPercent: current.relative_humidity_2m ?? null,
-      windSpeedKmh: current.wind_speed_10m ?? null,
-      precipitationMm: current.precipitation ?? 0,
-      pressureHpa: current.surface_pressure ?? null,
+      humidityPercent: finiteNumber(current.relative_humidity_2m),
+      windSpeedKmh: finiteNumber(current.wind_speed_10m),
+      precipitationMm: finiteNumber(current.precipitation) ?? 0,
+      pressureHpa: finiteNumber(current.surface_pressure),
     },
-    forecast: dates.map((date, index) => ({
+    forecast: forecastDates.map((date, index) => ({
       date,
-      weatherCode: daily.weather_code?.[index] ?? null,
-      minimumC: daily.temperature_2m_min?.[index] ?? null,
-      maximumC: daily.temperature_2m_max?.[index] ?? null,
-      precipitationProbabilityPercent: daily.precipitation_probability_max?.[index] ?? null,
+      weatherCode: finiteNumber(daily.weather_code?.[index]),
+      minimumC: finiteNumber(daily.temperature_2m_min?.[index]),
+      maximumC: finiteNumber(daily.temperature_2m_max?.[index]),
+      precipitationProbabilityPercent: finiteNumber(daily.precipitation_probability_max?.[index]),
     })),
   };
 }

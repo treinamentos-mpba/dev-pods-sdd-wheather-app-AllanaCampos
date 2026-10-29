@@ -9,7 +9,7 @@ interface CurrentWeatherProps {
 }
 
 function formatMetric(value: number | null | undefined, unit: string): string {
-  if (value === null || value === undefined) return 'Dados indisponíveis';
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 'Dados indisponíveis';
   return `${Number.isInteger(value) ? value : value.toFixed(1)} ${unit}`;
 }
 

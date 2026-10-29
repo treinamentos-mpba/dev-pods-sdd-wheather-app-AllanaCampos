@@ -168,6 +168,50 @@ describe('getWeather', () => {
     expect(weather.forecast[3]?.precipitationProbabilityPercent).toBe(80);
   });
 
+  it('normaliza campos current null e séries daily ausentes sem produzir undefined', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({
+        timezone: 'America/Sao_Paulo',
+        current: {
+          time: null,
+          temperature_2m: null,
+          weather_code: null,
+          relative_humidity_2m: null,
+          wind_speed_10m: null,
+          precipitation: null,
+          surface_pressure: null,
+        },
+        daily: {
+          time: ['2026-10-29', '2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02'],
+          weather_code: null,
+          temperature_2m_min: null,
+          temperature_2m_max: null,
+          precipitation_probability_max: null,
+        },
+      }),
+    );
+
+    const weather = await getWeather(city);
+
+    expect(weather.current).toEqual({
+      temperatureC: null,
+      weatherCode: null,
+      observedAt: null,
+      humidityPercent: null,
+      windSpeedKmh: null,
+      precipitationMm: 0,
+      pressureHpa: null,
+    });
+    expect(weather.forecast).toHaveLength(5);
+    expect(weather.forecast[0]).toEqual({
+      date: '2026-10-29',
+      weatherCode: null,
+      minimumC: null,
+      maximumC: null,
+      precipitationProbabilityPercent: null,
+    });
+  });
+
   it.each([
     ['current', { daily: { time: ['2026-10-29'] } }],
     ['daily', { current: { temperature_2m: 22 } }],
