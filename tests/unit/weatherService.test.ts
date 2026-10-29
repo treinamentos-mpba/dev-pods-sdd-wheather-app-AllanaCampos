@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getWeather, searchCities, WeatherServiceError } from '../../src/services/weatherService';
+import { getWeather, searchCities } from '../../src/services/weatherService';
 import type { City } from '../../src/types/weather';
 
 const city: City = {
@@ -68,6 +68,15 @@ describe('searchCities', () => {
 
     const requestUrl = new URL(String(fetchMock.mock.calls[0]?.[0]));
     expect(requestUrl.searchParams.get('name')).toBe("São Paulo d'Aliança");
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
+      encodeURIComponent("São Paulo d'Aliança"),
+    );
+  });
+
+  it('retorna lista vazia quando o geocoding não encontra cidades', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ results: [] }));
+
+    await expect(searchCities('Cidade inexistente')).resolves.toEqual([]);
   });
 
   it('retorna lista vazia quando results está ausente', async () => {
@@ -213,12 +222,31 @@ describe('getWeather', () => {
   });
 
   it.each([
-    ['current', { daily: { time: ['2026-10-29'] } }],
-    ['daily', { current: { temperature_2m: 22 } }],
-  ])('lança WeatherServiceError quando %s está ausente', async (_missing, payload) => {
+    ['current', { timezone: city.timezone, daily: { time: ['2026-10-29'] } }],
+    ['daily', { timezone: city.timezone, current: { temperature_2m: 22 } }],
+  ])('lança erro de resposta inválida quando %s está ausente', async (_missing, payload) => {
     fetchMock.mockResolvedValue(jsonResponse(payload));
 
-    await expect(getWeather(city)).rejects.toBeInstanceOf(WeatherServiceError);
+    await expect(getWeather(city)).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      kind: 'invalid-response',
+      service: 'weather',
+    });
+  });
+
+  it('lança erro de resposta inválida quando daily.time está ausente', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({
+        timezone: city.timezone,
+        current: { temperature_2m: 20 },
+        daily: { weather_code: [0, 1, 2, 3, 4] },
+      }),
+    );
+
+    await expect(getWeather(city)).rejects.toMatchObject({
+      name: 'WeatherServiceError',
+      kind: 'invalid-response',
+    });
   });
 
   it('converte falha de rede offline em erro amigável de forecast', async () => {

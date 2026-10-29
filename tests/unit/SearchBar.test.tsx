@@ -4,12 +4,15 @@ import { describe, expect, it, vi } from 'vitest';
 import SearchBar from '../../src/components/SearchBar';
 
 describe('SearchBar', () => {
-  it('não chama onSearch quando o input está vazio', async () => {
+  it.each(['', '   '])('não chama onSearch quando o input contém %j', async (value) => {
     const user = userEvent.setup();
     const onSearch = vi.fn();
 
     render(<SearchBar onSearch={onSearch} />);
 
+    if (value) {
+      await user.type(screen.getByRole('searchbox', { name: 'Buscar cidade' }), value);
+    }
     await user.click(screen.getByRole('button', { name: 'Buscar' }));
 
     expect(onSearch).not.toHaveBeenCalled();
