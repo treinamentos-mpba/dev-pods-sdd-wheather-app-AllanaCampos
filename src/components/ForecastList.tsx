@@ -10,7 +10,7 @@ export default function ForecastList({ forecast, unit }: ForecastListProps) {
   return (
     <section aria-labelledby="forecast-heading" className="w-full">
       <h2 id="forecast-heading" className="mb-4 text-xl font-semibold text-white">
-        Previsão para cinco dias
+        Previsão de 5 dias
       </h2>
       {forecast.length === 0 ? (
         <p className="text-sm text-white/60">Previsão indisponível</p>
